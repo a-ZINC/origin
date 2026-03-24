@@ -1,0 +1,45 @@
+{{ template "base.html" . }}
+
+{{ define "title" }}{{ .Post.Title }}{{ end }}
+
+{{ define "content" }}
+<article class="post-page">
+
+    {{ if .Post.SeriesName }}
+    <div class="series-label">
+        <a href="/series/{{ .Post.SeriesSlug }}">{{ .Post.SeriesName }}</a>
+        {{ if .Post.SeriesPos }} · part {{ .Post.SeriesPos }}{{ end }}
+    </div>
+    {{ end }}
+
+    <h1>{{ .Post.Title }}</h1>
+
+    <div class="post-info">
+        <span>{{ formatDate .Post.UpdatedAt }}</span>
+        <span>{{ .Post.ReadingTime }} min read</span>
+        {{ range .Post.Tags }}
+            <span class="tag">{{ . }}</span>
+        {{ end }}
+    </div>
+
+    <div class="post-body">
+        {{ safeHTML .Post.HTMLBody }}
+    </div>
+
+    {{ if or .Post.PrevPost .Post.NextPost }}
+    <nav class="series-nav">
+        {{ if .Post.PrevPost }}
+            <a href="/blog/{{ .Post.PrevPost.Slug }}" class="nav-prev">
+                ← {{ .Post.PrevPost.Title }}
+            </a>
+        {{ end }}
+        {{ if .Post.NextPost }}
+            <a href="/blog/{{ .Post.NextPost.Slug }}" class="nav-next">
+                {{ .Post.NextPost.Title }} →
+            </a>
+        {{ end }}
+    </nav>
+    {{ end }}
+
+</article>
+{{ end }}

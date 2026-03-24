@@ -1,0 +1,131 @@
+{{ template "base.html" . }}
+
+{{ define "title" }}Ajinkya Singh — backend engineer{{ end }}
+
+{{ define "content" }}
+<div class="hero">
+    <p class="eyebrow">backend engineer · super.money</p>
+    <h1>Ajinkya Singh<br><em>systems, infra, and Go</em></h1>
+    <p class="bio">
+        I build distributed backend systems at Super.money (Flipkart).
+        Previously at Alaan (YC | Sequoia). I write about container internals,
+        Kafka, Go, and things I learn breaking prod.
+        Based in India.
+    </p>
+    <div class="hero-links">
+        <a href="https://github.com/a-ZINC" class="hero-link" target="_blank">github</a>
+        <a href="https://dev.to/azinc" class="hero-link" target="_blank">dev.to</a>
+        <a href="mailto:azinc28@gmail.com" class="hero-link">email</a>
+    </div>
+</div>
+
+<section class="skills-section">
+    <div class="section-head">
+        <h2>stack</h2>
+    </div>
+    <div class="skills-grid">
+        <div class="skill-group">
+            <div class="skill-label">languages</div>
+            <div class="skill-tags">
+                <span class="tag">Go</span>
+                <span class="tag">Java</span>
+                <span class="tag">TypeScript</span>
+                <span class="tag">SQL</span>
+                <span class="tag">C/C++</span>
+            </div>
+        </div>
+        <div class="skill-group">
+            <div class="skill-label">backend</div>
+            <div class="skill-tags">
+                <span class="tag">Node.js</span>
+                <span class="tag">Express</span>
+                <span class="tag">Kafka</span>
+                <span class="tag">Redis</span>
+                <span class="tag">PostgreSQL</span>
+                <span class="tag">MongoDB</span>
+            </div>
+        </div>
+        <div class="skill-group">
+            <div class="skill-label">infra</div>
+            <div class="skill-tags">
+                <span class="tag">Kubernetes</span>
+                <span class="tag">Docker</span>
+                <span class="tag">AWS</span>
+                <span class="tag">Linux</span>
+                <span class="tag">Kafka</span>
+            </div>
+        </div>
+        <div class="skill-group">
+            <div class="skill-label">concepts</div>
+            <div class="skill-tags">
+                <span class="tag">microservices</span>
+                <span class="tag">system design</span>
+                <span class="tag">distributed systems</span>
+                <span class="tag">container internals</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="section-head">
+        <h2>recent posts</h2>
+        <a href="/blog">view all →</a>
+    </div>
+
+    {{ if .Posts }}
+        <div class="post-list">
+        {{ range .Posts }}
+            <a href="/blog/{{ .Slug }}" class="post-item">
+                <div>
+                    <div class="post-meta">
+                        {{ range .Tags }}
+                            <span class="tag">{{ . }}</span>
+                        {{ end }}
+                        {{ if .SeriesName }}
+                            <span class="series-badge">{{ .SeriesName }}</span>
+                        {{ end }}
+                    </div>
+                    <div class="post-title">{{ .Title }}</div>
+                    {{ if .Excerpt }}
+                        <div class="post-excerpt">{{ .Excerpt }}</div>
+                    {{ end }}
+                </div>
+                <div class="post-right">
+                    <div class="post-date">{{ formatDate .UpdatedAt }}</div>
+                    <div class="read-time">{{ .ReadingTime }} min read</div>
+                </div>
+            </a>
+        {{ end }}
+        </div>
+    {{ else }}
+        <p class="empty">no posts yet</p>
+    {{ end }}
+</section>
+
+{{ if .Projects }}
+<section>
+    <div class="section-head">
+        <h2>projects</h2>
+        <a href="/projects">view all →</a>
+    </div>
+    <div class="proj-grid">
+    {{ range .Projects }}
+        <a href="{{ if .URL }}{{ .URL }}{{ else }}{{ .RepoURL }}{{ end }}" class="proj-card" target="_blank">
+            {{ if .Language }}
+            <div class="proj-lang">
+                <span class="lang-dot lang-{{ .Language }}"></span>{{ .Language }}
+            </div>
+            {{ end }}
+            <div class="proj-name">{{ .Name }}</div>
+            <div class="proj-desc">{{ .Description }}</div>
+            {{ if .Stars }}
+            <div class="proj-stars">★ {{ .Stars }}</div>
+            {{ end }}
+        </a>
+    {{ end }}
+    </div>
+</section>
+{{ end }}
+
+{{ end }}

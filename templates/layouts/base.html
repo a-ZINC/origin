@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ block "title" . }}Ajinkya Singh{{ end }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">a-zinc<span>.</span>dev</a>
+        <div class="nav-links">
+            <a href="/blog">blog</a>
+            <a href="/series">series</a>
+            <a href="/projects">projects</a>
+            <a href="/about">about</a>
+            {{ if .IsAdmin }}
+            <a href="/admin" class="admin-link">admin</a>
+            {{ end }}
+        </div>
+    </nav>
+
+    <main>
+        {{ block "content" . }}{{ end }}
+    </main>
+
+    <footer>
+        <span>ajinkya singh</span>
+        <div>
+            <a href="https://github.com/a-ZINC" target="_blank">github</a>
+            <a href="https://linkedin.com/in/ajinkya-singh" target="_blank">linkedin</a>
+            <a href="https://dev.to/azinc" target="_blank">dev.to</a>
+            <a href="/blog">writing</a>
+        </div>
+    </footer>
+</body>
+</html>
