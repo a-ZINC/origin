@@ -7,8 +7,8 @@ type PostPublication struct {
 	PostId string `json:"postId"`
 	Platform string `json:"platform"`
 	PlatformPostID string `json:"platformPostId"`
-	PlatformURL string `json:"platformURL"`
-	CanonicalURL  string `json:"canonicalURL"`
+	PlatformURL string `json:"platformUrl"`
+	CanonicalURL  string `json:"canonicalUrl"`
 	SyncStatus string `json:"syncStatus"`
 	SyncedAt *time.Time `json:"syncedAt"`
 	CreatedAt time.Time `json:"createdAt"`
