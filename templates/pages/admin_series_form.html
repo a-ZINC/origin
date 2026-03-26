@@ -1,0 +1,32 @@
+{{ template "base.html" . }}
+{{ define "title" }}{{ if .IsNew }}new series{{ else }}edit series{{ end }}{{ end }}
+{{ define "content" }}
+<div class="admin-wrap">
+    <div class="admin-header">
+        <h1 class="admin-title">{{ if .IsNew }}new series{{ else }}edit series{{ end }}</h1>
+        <a href="/admin" class="btn-ghost">← back</a>
+    </div>
+    <form method="POST"
+          action="{{ if .IsNew }}/admin/series{{ else }}/admin/series/{{ .Series.ID }}{{ end }}"
+          class="simple-form">
+        <div class="form-group">
+            <label>name</label>
+            <input type="text" name="name" value="{{ .Series.Name }}" required
+                   placeholder="Building a blog in Go">
+        </div>
+        <div class="form-group">
+            <label>slug</label>
+            <input type="text" name="slug" value="{{ .Series.Slug }}"
+                   placeholder="building-a-blog-in-go">
+        </div>
+        <div class="form-group">
+            <label>description</label>
+            <textarea name="description"
+                      placeholder="What this series covers...">{{ .Series.Description }}</textarea>
+        </div>
+        <button type="submit" class="btn-submit">
+            {{ if .IsNew }}create{{ else }}save{{ end }}
+        </button>
+    </form>
+</div>
+{{ end }}

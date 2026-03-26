@@ -1,0 +1,157 @@
+{{ template "base.html" . }}
+
+{{ define "title" }}{{ if .IsNew }}new post{{ else }}edit post{{ end }}{{ end }}
+
+{{ define "content" }}
+<div class="editor-wrap">
+
+    <div class="editor-header">
+        <h1 class="admin-title">{{ if .IsNew }}new post{{ else }}edit — {{ .Post.Title }}{{ end }}</h1>
+        <a href="/admin" class="btn-ghost">← back</a>
+    </div>
+
+    <form method="POST"
+          action="{{ if .IsNew }}/admin/posts{{ else }}/admin/posts/{{ .Post.ID }}{{ end }}"
+          class="editor-form">
+
+        <div class="editor-main">
+
+            <div class="form-group">
+                <label>title</label>
+                <input type="text" name="title" value="{{ .Post.Title }}"
+                       required placeholder="Post title"
+                       oninput="autoSlug(this.value)">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>slug</label>
+                    <input type="text" id="slug" name="slug" value="{{ .Post.Slug }}"
+                           placeholder="auto-generated">
+                </div>
+                <div class="form-group">
+                    <label>tags <span class="hint">comma separated</span></label>
+                    <input type="text" name="tags" value="{{ join .Post.Tags "," }}"
+                           placeholder="go, backend, kafka">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>excerpt</label>
+                <input type="text" name="excerpt" value="{{ .Post.Excerpt }}"
+                       placeholder="Short description for post cards">
+            </div>
+
+            <div class="editor-split">
+                <div class="editor-left">
+                    <label>body <span class="hint">markdown</span></label>
+                    <textarea name="body" id="body"
+                              oninput="updatePreview()"
+                              placeholder="Write your post in markdown...">{{ .Post.Body }}</textarea>
+                </div>
+                <div class="editor-right">
+                    <label>preview</label>
+                    <div id="preview" class="post-body preview-pane"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="editor-sidebar">
+
+            <div class="sidebar-section">
+                <div class="sidebar-label">status</div>
+                <select name="published">
+                    <option value="false" {{ if not .Post.Published }}selected{{ end }}>draft</option>
+                    <option value="true"  {{ if .Post.Published }}selected{{ end }}>published</option>
+                </select>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-label">visibility</div>
+                <select name="visibility">
+                    <option value="public"  {{ if eq .Post.Visibility "public" }}selected{{ end }}>public</option>
+                    <option value="private" {{ if eq .Post.Visibility "private" }}selected{{ end }}>private</option>
+                </select>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-label">series</div>
+                <select name="series_id">
+                    <option value="">none</option>
+                    {{ range .Series }}
+                    <option value="{{ .ID }}"
+                        {{ if $.Post.SeriesID }}
+                            {{ if eq $.Post.SeriesID .ID }}selected{{ end }}
+                        {{ end }}>
+                        {{ .Name }}
+                    </option>
+                    {{ end }}
+                </select>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-label">series position</div>
+                <input type="number" name="series_pos" min="1"
+                       value="{{ if .Post.SeriesPos }}{{ .Post.SeriesPos }}{{ end }}"
+                       placeholder="1">
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-label">cover image url</div>
+                <input type="text" name="cover_image"
+                       value="{{ .Post.CoverImage }}"
+                       placeholder="https://...">
+            </div>
+
+            <button type="submit" class="btn-submit full-width">
+                {{ if .IsNew }}create post{{ else }}save changes{{ end }}
+            </button>
+
+        </div>
+    </form>
+</div>
+
+<script>
+function slugify(s) {
+    return s.toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+}
+
+function autoSlug(title) {
+    const slugEl = document.getElementById('slug');
+    // only auto-fill if user hasn't manually edited it
+    if (!slugEl.dataset.manual) {
+        slugEl.value = slugify(title);
+    }
+}
+
+document.getElementById('slug').addEventListener('input', function() {
+    this.dataset.manual = 'true';
+});
+
+// live markdown preview
+let previewTimer;
+function updatePreview() {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(() => {
+        const body = document.getElementById('body').value;
+        fetch('/admin/preview', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'body=' + encodeURIComponent(body)
+        })
+        .then(r => r.text())
+        .then(html => {
+            document.getElementById('preview').innerHTML = html;
+        });
+    }, 300); // debounce 300ms
+}
+
+// render on page load for edit mode
+updatePreview();
+</script>
+{{ end }}

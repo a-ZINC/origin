@@ -1,0 +1,101 @@
+{{ template "base.html" . }}
+
+{{ define "title" }}admin{{ end }}
+
+{{ define "content" }}
+<div class="admin-wrap">
+
+    <div class="admin-header">
+        <h1 class="admin-title">dashboard</h1>
+        <div class="admin-actions">
+            <a href="/admin/posts/new" class="btn-primary">+ new post</a>
+            <a href="/admin/series/new" class="btn-ghost">+ series</a>
+            <a href="/admin/projects/new" class="btn-ghost">+ project</a>
+            <form method="POST" action="/logout" style="display:inline">
+                <button type="submit" class="btn-ghost">logout</button>
+            </form>
+        </div>
+    </div>
+
+    <section class="admin-section">
+        <h2 class="admin-section-title">posts ({{ len .Posts }})</h2>
+        <div class="admin-list">
+        {{ range .Posts }}
+            <div class="admin-row">
+                <div class="admin-row-info">
+                    <span class="admin-row-title">{{ .Title }}</span>
+                    <div class="admin-row-meta">
+                        {{ if .Published }}
+                            <span class="badge-published">published</span>
+                        {{ else }}
+                            <span class="badge-draft">draft</span>
+                        {{ end }}
+                        {{ if eq .Visibility "private" }}
+                            <span class="badge-private">private</span>
+                        {{ end }}
+                        {{ if .SeriesName }}
+                            <span class="badge-series">{{ .SeriesName }}</span>
+                        {{ end }}
+                        {{ range .Tags }}
+                            <span class="tag">{{ . }}</span>
+                        {{ end }}
+                    </div>
+                </div>
+                <div class="admin-row-actions">
+                    <a href="/blog/{{ .Slug }}" class="action-link" target="_blank">view</a>
+                    <a href="/admin/posts/{{ .ID }}/edit" class="action-link">edit</a>
+                    <form method="POST" action="/admin/posts/{{ .ID }}/delete" style="display:inline"
+                          onsubmit="return confirm('delete this post?')">
+                        <button type="submit" class="action-delete">delete</button>
+                    </form>
+                </div>
+            </div>
+        {{ end }}
+        </div>
+    </section>
+
+    <section class="admin-section">
+        <h2 class="admin-section-title">series ({{ len .Series }})</h2>
+        <div class="admin-list">
+        {{ range .Series }}
+            <div class="admin-row">
+                <div class="admin-row-info">
+                    <span class="admin-row-title">{{ .Name }}</span>
+                    <span class="admin-row-meta">{{ .PostCount }} posts</span>
+                </div>
+                <div class="admin-row-actions">
+                    <a href="/series/{{ .Slug }}" class="action-link" target="_blank">view</a>
+                    <a href="/admin/series/{{ .ID }}/edit" class="action-link">edit</a>
+                    <form method="POST" action="/admin/series/{{ .ID }}/delete" style="display:inline"
+                          onsubmit="return confirm('delete this series?')">
+                        <button type="submit" class="action-delete">delete</button>
+                    </form>
+                </div>
+            </div>
+        {{ end }}
+        </div>
+    </section>
+
+    <section class="admin-section">
+        <h2 class="admin-section-title">projects ({{ len .Projects }})</h2>
+        <div class="admin-list">
+        {{ range .Projects }}
+            <div class="admin-row">
+                <div class="admin-row-info">
+                    <span class="admin-row-title">{{ .Name }}</span>
+                    <span class="admin-row-meta">{{ .Language }}</span>
+                </div>
+                <div class="admin-row-actions">
+                    <a href="/admin/projects/{{ .ID }}/edit" class="action-link">edit</a>
+                    <form method="POST" action="/admin/projects/{{ .ID }}/delete" style="display:inline"
+                          onsubmit="return confirm('delete?')">
+                        <button type="submit" class="action-delete">delete</button>
+                    </form>
+                </div>
+            </div>
+        {{ end }}
+        </div>
+    </section>
+
+</div>
+{{ end }}
