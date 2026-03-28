@@ -4,13 +4,9 @@ import (
 	"context"
 	"fmt"
 	"html/template"
-	"io/fs"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
-	"strings"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
@@ -33,6 +29,7 @@ func main() {
 	secret := getenv("SESSION_SECRET", "secret")
 	adminEmail := getenv("ADMIN_EMAIL", "admin")
 	adminPass := getenv("ADMIN_PASSWORD", "")
+	port := getenv("PORT", "8080")
 
 	st, err := store.New(dbUrl)
 	if err != nil {
@@ -46,20 +43,8 @@ func main() {
 		}
 	}
 
-	tmpl, err := loadTemplates()
-	if err != nil {
-		panic(err)
-	}
-
-	sessStore := sessions.NewCookieStore([]byte(secret))
-	sessStore.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   86400 * 7,
-		HttpOnly: true,
-	}
-
-	authHandler := handlers.NewAuthHandler(st, tmpl, sessStore)
-	adminHandler := handlers.NewAdminHandler(st, tmpl, sessStore)
+	authHandler := handlers.NewAuthHandler(st, sessStor)
+	adminHandler := handlers.NewAdminHandler(st, sessStore)
 
 	r := chi.NewRouter()
 	r.Use(chiMiddleware.Logger)
@@ -75,11 +60,8 @@ func main() {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		posts, _ := st.ListPosts(r.Context(), middleware.IsAdmin(r.Context()))
 		projects, _ := st.ListProjects(r.Context())
-		renderTmpl(w, tmpl, "home.html", map[string]interface{}{
-			"Posts":    posts,
-			"Projects": projects,
-			"IsAdmin":  middleware.IsAdmin(r.Context()),
-		})
+
+		fmt.Printf("post: %v, projects: %v")
 	})
 
 	r.Get("/blog", func(w http.ResponseWriter, r *http.Request) {
@@ -90,11 +72,6 @@ func main() {
 		} else {
 			posts, _ = st.ListPosts(r.Context(), middleware.IsAdmin(r.Context()))
 		}
-		renderTmpl(w, tmpl, "blog.html", map[string]interface{}{
-			"Posts":     posts,
-			"ActiveTag": tag,
-			"IsAdmin":   middleware.IsAdmin(r.Context()),
-		})
 	})
 
 	r.Get("/blog/{slug}", func(w http.ResponseWriter, r *http.Request) {
@@ -107,32 +84,17 @@ func main() {
 		}
 
 		post.HTMLBody = render_.Markdown(post.Body)
-		renderTmpl(w, tmpl, "post.html", map[string]interface{}{
-			"Post":    post,
-			"IsAdmin": false,
-		})
 	})
 
 	r.Get("/series", func(w http.ResponseWriter, r *http.Request) {
 		series, _ := st.ListSeries(r.Context())
-		renderTmpl(w, tmpl, "series.html", map[string]interface{}{
-			"Series":  series,
-			"IsAdmin": middleware.IsAdmin(r.Context()),
-		})
 	})
 
 	r.Get("/projects", func(w http.ResponseWriter, r *http.Request) {
 		projects, _ := st.ListProjects(r.Context())
-		renderTmpl(w, tmpl, "projects.html", map[string]interface{}{
-			"Projects": projects,
-			"IsAdmin":  middleware.IsAdmin(r.Context()),
-		})
 	})
 
 	r.Get("/about", func(w http.ResponseWriter, r *http.Request) {
-		renderTmpl(w, tmpl, "about.html", map[string]interface{}{
-			"IsAdmin": middleware.IsAdmin(r.Context()),
-		})
 	})
 
 	r.Post("/contact", func(w http.ResponseWriter, r *http.Request) {
@@ -173,44 +135,6 @@ func main() {
 	fmt.Println("server started")
 
 	http.ListenAndServe(":8080", r)
-}
-
-func loadTemplates() (*template.Template, error) {
-	funcMap := template.FuncMap{
-		"formatDate": func(t *time.Time) string {
-			if t == nil {
-				return ""
-			}
-			return t.Format("Jan 2, 2006")
-		},
-		"safeHTML": func(s interface{}) template.HTML {
-			if s == nil {
-				return ""
-			}
-			switch v := s.(type) {
-			case string:
-				return template.HTML(v)
-			case []byte:
-				return template.HTML(string(v))
-			default:
-				return ""
-			}
-		},
-		"join": strings.Join,
-	}
-
-	tmpl := template.New("").Funcs(funcMap)
-
-	err := filepath.Walk("templates", func(path string, info fs.FileInfo, err error) error {
-		if err != nil || info.IsDir() || !strings.HasSuffix(path, ".html") {
-			return err
-		}
-
-		_, err = tmpl.ParseFiles(path)
-		return err
-	})
-
-	return tmpl, err
 }
 
 func getenv(key ,de string) string {

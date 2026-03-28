@@ -1,6 +1,8 @@
-{{ template "base.html" . }}
+{{ define "home.html" }}
+    {{ template "base.html" . }}
+{{ end }}
 
-{{ define "title" }}Ajinkya Singh — backend engineer{{ end }}
+{{ define "title" }}Ajinkya Singh{{ end }}
 
 {{ define "content" }}
 <div class="hero">
@@ -127,5 +129,4 @@
     </div>
 </section>
 {{ end }}
-
 {{ end }}

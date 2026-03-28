@@ -3,34 +3,40 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"strings"
 
-	"github.com/gorilla/sessions"
+	"github.com/golang-jwt/jwt/v5"
+	"origin.me/internal/handlers"
 )
 
-type ctxKey string
-const adminKey ctxKey = "isAdmin"
-
-func SetAdmin(store sessions.Store, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		sess, _ := store.Get(r, "session")
-		isAdmin, _ := (sess.Values["admin"]).(bool)
-
-		ctx := context.WithValue(r.Context(), adminKey, isAdmin)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+func JWTMiddleware(secret string) func(http.Handler) http.Handler {
+	key := []byte(secret)
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			authHeader := r.Header.Get("Authorization")
+			if strings.HasPrefix(authHeader, "Bearer ") {
+				tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+				token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+					return key, nil
+				})
+				if err == nil && token.Valid {
+					claims, _ := token.Claims.(jwt.MapClaims)
+					isAdmin, _ := claims["isAdmin"].(bool)
+					ctx := handlers.WithAdmin(r.Context(), isAdmin)
+					r = r.WithContext(ctx)
+				}
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
-func RequireAdmin(store sessions.Store, next http.Handler) http.Handler {
+func RequireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		isAdmin := r.Context().Value(adminKey).(bool)
-		if !isAdmin {
-			http.Redirect(w, r, "/login", http.StatusFound)
+		if !handlers.IsAdminCtx(r.Context()) {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
 		next.ServeHTTP(w, r)
 	})
-}
-
-func IsAdmin(ctx context.Context) bool {
-	return ctx.Value(adminKey).(bool)
 }

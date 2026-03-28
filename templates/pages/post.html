@@ -1,4 +1,6 @@
-{{ template "base.html" . }}
+{{ define "post.html" }}
+    {{ template "base.html" . }}
+{{ end }}
 
 {{ define "title" }}{{ .Post.Title }}{{ end }}
 

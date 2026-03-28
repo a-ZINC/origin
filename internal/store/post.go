@@ -278,3 +278,25 @@ func (s *Store) DeletePost(ctx context.Context, id string) error {
 	_, err := s.db.ExecContext(ctx, query, id)
 	return err
 }
+
+func (s *Store) ListPostBySeries(ctx context.Context, seriesID string, includePrivate bool) ([]*models.Post, error) {
+	query := postSelect + `WHERE p."seriesId" = $1 ORDER BY p."seriesPos" ASC, p."createdAt" DESC`
+	if !includePrivate {
+		query += " AND p.visibility = 'public'"
+	}
+	rows, err := s.db.QueryContext(ctx, query, seriesID)
+	if err != nil {
+		return nil, fmt.Errorf("list posts: %w", err)
+	}
+	defer rows.Close()
+
+	var posts []*models.Post
+	for rows.Next() {
+		p := &models.Post{}
+		if err := scanPost(rows, p); err != nil {
+			return nil, fmt.Errorf("list posts: %w", err)
+		}
+		posts = append(posts, p)
+	}
+	return posts, rows.Err()
+}
