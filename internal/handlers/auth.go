@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"html/template"
+	"log"
 	"net/http"
 	"time"
 
@@ -24,27 +24,29 @@ func NewAuthHandler(store *store.Store, jwtSecret string) *AuthHandler {
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var body struct {
-		email string `json:"email"`
-		password string `json:"password"`
+		Email string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	if err := readJson(r, &body); err != nil {
 		fail(w, "invalid json", 400)
 		return
 	}
+	log.Println(body)
 
-	user, err := h.store.GetUserByEmail(r.Context(), body.email)
+	user, err := h.store.GetUserByEmail(r.Context(), body.Email)
 	if err != nil {
 		fail(w, "db error", 500)
 		return
 	}
+	log.Println(user)
 
 	if user == nil {
 		fail(w, "user not found", 404)
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)); err != nil {
 		fail(w, "invalid password", 401)
 		return
 	}

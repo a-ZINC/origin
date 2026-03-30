@@ -1,0 +1,83 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-sans:  "DM Sans", sans-serif;
+  --font-serif: "DM Serif Display", serif;
+  --font-mono:  "JetBrains Mono", monospace;
+}
+
+@layer base {
+  :root {
+    --bg:   #09090f;
+    --s1:   #0f0f1a;
+    --s2:   #141420;
+    --s3:   #1c1c2e;
+    --b1:   rgba(255,255,255,0.06);
+    --b2:   rgba(255,255,255,0.10);
+    --b3:   rgba(255,255,255,0.16);
+    --t1:   #f0eeff;
+    --t2:   #9490b8;
+    --t3:   #524e7a;
+    --p:    #8b5cf6;
+    --p2:   #a78bfa;
+    --p3:   #c4b5fd;
+    --cyan: #06b6d4;
+    --green:#10b981;
+    --amber:#f59e0b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--t1);
+    font-family: "DM Sans", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar        { width: 5px; }
+  ::-webkit-scrollbar-track  { background: var(--bg); }
+  ::-webkit-scrollbar-thumb  { background: var(--b2); border-radius: 3px; }
+}
+
+@layer utilities {
+  .bg-bg     { background-color: var(--bg); }
+  .bg-s1     { background-color: var(--s1); }
+  .bg-s2     { background-color: var(--s2); }
+  .bg-s3     { background-color: var(--s3); }
+
+  .text-t1   { color: var(--t1); }
+  .text-t2   { color: var(--t2); }
+  .text-t3   { color: var(--t3); }
+  .text-p    { color: var(--p); }
+  .text-p2   { color: var(--p2); }
+  .text-p3   { color: var(--p3); }
+  .text-cyan { color: var(--cyan); }
+  .text-green{ color: var(--green); }
+  .text-amber{ color: var(--amber); }
+
+  .border-b1 { border-color: var(--b1); }
+  .border-b2 { border-color: var(--b2); }
+  .border-b3 { border-color: var(--b3); }
+  .border-p  { border-color: var(--p); }
+  .border-p2 { border-color: var(--p2); }
+
+  .font-serif { font-family: "DM Serif Display", serif; }
+  .font-mono  { font-family: "JetBrains Mono", monospace; }
+  .font-sans  { font-family: "DM Sans", sans-serif; }
+
+  .animate-blink {
+    animation: blink 2s ease-in-out infinite;
+  }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}

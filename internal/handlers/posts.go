@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -19,7 +18,7 @@ func NewPostHandler(store *store.Store) *PostHandler {
 }
 
 func(h *PostHandler) List(w http.ResponseWriter, r *http.Request) {
-	isAdmin := isAdminCtx(r.Context())
+	isAdmin := IsAdminCtx(r.Context())
 	tag := r.URL.Query().Get("tag")
 
 	var posts interface{}

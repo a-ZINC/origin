@@ -9,7 +9,11 @@ type ctxKey string
 const adminKey ctxKey = "isAdmin"
 
 func IsAdminCtx(ctx context.Context) bool {
-	return ctx.Value(adminKey).(bool)
+	val, ok := ctx.Value(adminKey).(bool)
+	if !ok {
+		return false
+	}
+	return val
 }
 
 func slugify(s string) string {
